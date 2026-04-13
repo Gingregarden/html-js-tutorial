@@ -5,40 +5,74 @@
     <title>マイGUIアプリ</title>
 </head>
 <body>
-    <h1>学習用アプリ</h1>
+    <h1>JSON読み込みアプリ</h1>
     
-    <input type="number" id="myInput" placeholder="摂氏を入力...">
-    
-    <button id="myButton">変換</button>
-    
-    <p id="result">華氏がここに表示されます</p>
+    <!--ファイル読み込み-->
+    <input type="file" id="fileInput" accept=".json" multiple>
+    <div id="fileContent">ここにファイル情報を表示します</div>
+
+    <!--表のひな形-->
+    <div id="buttonContainer"></div> <table border="1">
+        <thead>
+            <tr id="headerRow"></tr> </thead>
+        <tbody id="tableBody"></tbody>
+    </table>
 
     <script>
-        const btn = document.getElementById('myButton');
-        const input = document.getElementById('myInput');
-        const result = document.getElementById('result');
+        const fileInput = document.getElementById('fileInput');
+        const display = document.getElementById('fileContent');
+        // 読み込んだデータを保存する場所 { ファイル名: データ }
+        const dataStore = {};
 
-        function to_fahrenheit(celsius){
-            return celsius * 1.8 + 32;
-        }
+        fileInput.addEventListener('change', (event) => {
+            const files = event.target.files;
+            const buttonContainer = document.getElementById('buttonContainer');
+            // ボタンをリセット
+            buttonContainer.innerHTML = "";
 
-        btn.addEventListener('click', () => {
-            val = input.value;
-            if(val == ""){
-                return;
-            }
+            Array.from(files).forEach(file => {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const data = JSON.parse(e.target.result);
+                    dataStore[file.name] = data; // データを保存
 
-            const celsius = parseFloat(val)
-            if(Number.isNaN(celsius)){
-                result.textContent = "有効な数値を入力してください。";
-                return;
-            }
-
-            const fahrenheit = to_fahrenheit(celsius);
-            
-            result.textContent = fahrenheit.toFixed(2) + "°F";
+                    // ファイルごとの切り替えボタンを作成
+                    const btn = document.createElement('button');
+                    btn.textContent = file.name;
+                    btn.onclick = () => displayTable(file.name); // クリックで表示関数を呼ぶ
+                    buttonContainer.appendChild(btn);
+                };
+                reader.readAsText(file);
+            });
         });
 
+        function displayTable(fileName) {
+            const data = dataStore[fileName];
+            const tableBody = document.getElementById('tableBody');
+            const headerRow = document.getElementById('headerRow');
+
+            tableBody.innerHTML = "";
+            headerRow.innerHTML = "";
+
+            if (!data || data.length === 0) return;
+
+            // 1. ヘッダーを動的に作成（JSONのキーから作成）
+            const keys = Object.keys(data[0]);
+            keys.forEach(key => {
+                const th = document.createElement('th');
+                th.textContent = key;
+                headerRow.appendChild(th);
+            });
+
+            // 2. ボディを作成
+            data.forEach(item => {
+                const row = tableBody.insertRow();
+                keys.forEach(key => {
+                    const cell = row.insertCell();
+                    cell.textContent = item[key];
+                });
+            });
+        }
 
     </script>
 
