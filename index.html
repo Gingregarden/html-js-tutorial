@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>マイGUIアプリ</title>
+</head>
+<body>
+    <h1>学習用アプリ</h1>
+    
+    <input type="number" id="myInput" placeholder="摂氏を入力...">
+    
+    <button id="myButton">変換</button>
+    
+    <p id="result">華氏がここに表示されます</p>
+
+    <script>
+        const btn = document.getElementById('myButton');
+        const input = document.getElementById('myInput');
+        const result = document.getElementById('result');
+
+        function to_fahrenheit(celsius){
+            return celsius * 1.8 + 32;
+        }
+
+        btn.addEventListener('click', () => {
+            val = input.value;
+            if(val == ""){
+                return;
+            }
+
+            const celsius = parseFloat(val)
+            if(Number.isNaN(celsius)){
+                result.textContent = "有効な数値を入力してください。";
+                return;
+            }
+
+            const fahrenheit = to_fahrenheit(celsius);
+            
+            result.textContent = fahrenheit.toFixed(2) + "°F";
+        });
+
+
+    </script>
+
+</body>
+</html>
