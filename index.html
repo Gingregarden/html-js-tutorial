@@ -82,20 +82,30 @@
                 } else {
                     valueCell.textContent = value;
                 }
-}
+            }
+
+            /**
+             * エリアを初期化してタイトルとテーブルを準備する
+             * @param {string} areaId - 表示先のID
+             * @param {string} title - 表示する見出し
+             * @returns {HTMLTableElement} 作成したテーブルオブジェクト
+             */
+            function prepareArea(areaId, title) {
+                const area = document.getElementById(areaId);
+                area.innerHTML = `<h2>${title}</h2>`;
+                const table = document.createElement('table');
+                area.appendChild(table);
+                return table;
+            }
 
             // レベル1: 会社概要を表示
             function displayCompanyInfo(company) {
-                const area1 = document.getElementById('level1-area');
-                const area2 = document.getElementById('level2-area');
-                const area3 = document.getElementById('level3-area');
-                
                 // 下位階層をクリア
-                area1.innerHTML = "<h2>会社概要</h2>";
-                area2.innerHTML = "";
-                area3.innerHTML = "";
-
-                const table = document.createElement('table');
+                document.getElementById('level2-area').innerHTML = "";
+                document.getElementById('level3-area').innerHTML = "";
+                
+                // テーブルを取得
+                const table = prepareArea('level1-area', "会社概要");
                 
                 // 資本金の行
                 addInfoRow(table, "資本金", company.capital_yen.toLocaleString() + "円");
@@ -122,13 +132,10 @@
 
             // レベル2: 地域詳細
             function displayRegionDetails(region) {
-                const area2 = document.getElementById('level2-area');
-                const area3 = document.getElementById('level3-area');
+                document.getElementById('level3-area').innerHTML = "";
                 
-                area2.innerHTML = "<h2>地域詳細: " + region.name + "</h2>";
-                area3.innerHTML = ""; // さらに下の階層をクリア
-
-                const table = document.createElement('table');
+                // テーブルを取得
+                const table = prepareArea('level2-area', "地域詳細" + region.name);
 
                 // 地域名の行
                 addInfoRow(table, "地域名", region.name);
@@ -155,11 +162,8 @@
 
             // レベル3: 従業員詳細
             function displayEmployeeDetails(emp) {
-                const area3 = document.getElementById('level3-area');
-
-                area3.innerHTML = "<h2>従業員詳細: " + emp.name + "</h2>";
-
-                const table = document.createElement('table');
+                // テーブルを取得
+                const table = prepareArea("level3-area", "従業員詳細" + emp.name)
 
                 // 氏名の行
                 addInfoRow(table, "氏名", emp.name);
@@ -169,34 +173,6 @@
 
                 area3.appendChild(table);
             }
-
-            // function displayTable(fileName) {
-            //     const data = dataStore[fileName];
-            //     const tableBody = document.getElementById('tableBody');
-            //     const headerRow = document.getElementById('headerRow');
-
-            //     tableBody.innerHTML = "";
-            //     headerRow.innerHTML = "";
-
-            //     if (!data || data.length === 0) return;
-
-            //     // 1. ヘッダーを動的に作成（JSONのキーから作成）
-            //     const keys = Object.keys(data[0]);
-            //     keys.forEach(key => {
-            //         const th = document.createElement('th');
-            //         th.textContent = key;
-            //         headerRow.appendChild(th);
-            //     });
-
-            //     // 2. ボディを作成
-            //     data.forEach(item => {
-            //         const row = tableBody.insertRow();
-            //         keys.forEach(key => {
-            //             const cell = row.insertCell();
-            //             cell.textContent = item[key];
-            //         });
-            //     });
-            // }
 
         </script>
 
