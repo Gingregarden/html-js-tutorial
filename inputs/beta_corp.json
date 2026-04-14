@@ -1,0 +1,32 @@
+{
+    "name": "Beta Corp.",
+    "capital_yen": 5000000,
+    "regions": [
+        {
+            "name": "Yokohama",
+            "employees": [
+                {
+                    "name": "Ichiro",
+                    "age": 45
+                },
+                {
+                    "name": "Kanako",
+                    "age": 34
+                }
+            ]
+        },
+        {
+            "name": "San Francisco",
+            "employees": [
+                {
+                    "name": "Steve",
+                    "age": 51
+                },
+                {
+                    "name": "Jane",
+                    "age": 56
+                }
+            ]
+        }
+    ]
+}

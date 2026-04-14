@@ -1,80 +1,193 @@
 <!DOCTYPE html>
 <html>
-<head>
-    <meta charset="UTF-8">
-    <title>マイGUIアプリ</title>
-</head>
-<body>
-    <h1>JSON読み込みアプリ</h1>
-    
-    <!--ファイル読み込み-->
-    <input type="file" id="fileInput" accept=".json" multiple>
-    <div id="fileContent">ここにファイル情報を表示します</div>
+    <head>
+        <meta charset="UTF-8">
+        <title>マイGUIアプリ</title>
+        <style>
+            .clickable-link {
+                color: #0066cc;
+                text-decoration: underline;
+                cursor: pointer;
+                margin: 0 5px;
+            }
+            .clickable-link:hover {
+                color: #ff0000;
+            }
+            table { margin-top: 10px; border-collapse: collapse; }
+            th, td { padding: 8px; border: 1px solid #ccc; }
+        </style>
+    </head>
+    <body>
+        <h1>ネストJSON読み込みアプリ</h1>
+        
+        <!--ファイル読み込み-->
+        <input type="file" id="fileInput" accept=".json" multiple>
+        <div id="fileContent">ここにファイル情報を表示します</div>
 
-    <!--表のひな形-->
-    <div id="buttonContainer"></div> <table border="1">
-        <thead>
-            <tr id="headerRow"></tr> </thead>
-        <tbody id="tableBody"></tbody>
-    </table>
+        <!--ファイル選択ボタン-->
+        <div id="buttonContainer"></div></table>
 
-    <script>
-        const fileInput = document.getElementById('fileInput');
-        const display = document.getElementById('fileContent');
-        // 読み込んだデータを保存する場所 { ファイル名: データ }
-        const dataStore = {};
+        <!--表のひな形-->
+        <div id="level1-area"></div>
+        <hr>
+        <div id="level2-area"></div>
+        <hr>
+        <div id="level3-area"></div>
 
-        fileInput.addEventListener('change', (event) => {
-            const files = event.target.files;
-            const buttonContainer = document.getElementById('buttonContainer');
-            // ボタンをリセット
-            buttonContainer.innerHTML = "";
+        <script>
+            const fileInput = document.getElementById('fileInput');
+            const display = document.getElementById('fileContent');
+            // 読み込んだデータを保存する場所 { ファイル名: データ }
+            const dataStore = {};
 
-            Array.from(files).forEach(file => {
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    const data = JSON.parse(e.target.result);
-                    dataStore[file.name] = data; // データを保存
+            fileInput.addEventListener('change', (event) => {
+                const files = event.target.files;
+                const buttonContainer = document.getElementById('buttonContainer');
+                // ボタンをリセット
+                buttonContainer.innerHTML = "";
 
-                    // ファイルごとの切り替えボタンを作成
-                    const btn = document.createElement('button');
-                    btn.textContent = file.name;
-                    btn.onclick = () => displayTable(file.name); // クリックで表示関数を呼ぶ
-                    buttonContainer.appendChild(btn);
-                };
-                reader.readAsText(file);
-            });
-        });
+                Array.from(files).forEach(file => {
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        const jsonData = JSON.parse(e.target.result);
+                        dataStore[file.name] = jsonData; // データを保存
 
-        function displayTable(fileName) {
-            const data = dataStore[fileName];
-            const tableBody = document.getElementById('tableBody');
-            const headerRow = document.getElementById('headerRow');
+                        // ファイルごとの切り替えボタンを作成
+                        const btn = document.createElement('button');
+                        btn.textContent = file.name;
+                        // ファイルを選んだら、まず「会社概要」の表示関数を呼ぶ
+                        btn.onclick = () => displayCompanyInfo(jsonData); 
+                        buttonContainer.appendChild(btn);
 
-            tableBody.innerHTML = "";
-            headerRow.innerHTML = "";
-
-            if (!data || data.length === 0) return;
-
-            // 1. ヘッダーを動的に作成（JSONのキーから作成）
-            const keys = Object.keys(data[0]);
-            keys.forEach(key => {
-                const th = document.createElement('th');
-                th.textContent = key;
-                headerRow.appendChild(th);
-            });
-
-            // 2. ボディを作成
-            data.forEach(item => {
-                const row = tableBody.insertRow();
-                keys.forEach(key => {
-                    const cell = row.insertCell();
-                    cell.textContent = item[key];
+                        display.textContent = file.name + " を読み込みました";
+                    };
+                    reader.readAsText(file);
                 });
             });
-        }
 
-    </script>
+            // レベル1: 会社概要を表示
+            function displayCompanyInfo(company) {
+                const area1 = document.getElementById('level1-area');
+                const area2 = document.getElementById('level2-area');
+                const area3 = document.getElementById('level3-area');
+                
+                // 下位階層をクリア
+                area1.innerHTML = "<h2>会社概要</h2>";
+                area2.innerHTML = "";
+                area3.innerHTML = "";
 
-</body>
+                const table = document.createElement('table');
+                
+                // 資本金の行
+                const rowCap = table.insertRow();
+                rowCap.insertCell().textContent = "資本金";
+                rowCap.insertCell().textContent = company.capital_yen.toLocaleString() + "円";
+
+                // 地域の行
+                const rowReg = table.insertRow();
+                rowReg.insertCell().textContent = "地域";
+                const regCell = rowReg.insertCell();
+
+                // 地域の配列をループして「リンク風ボタン」を作成
+                company.regions.forEach(region => {
+                    const span = document.createElement('span');
+                    span.textContent = region.name;
+                    span.className = "clickable-link";
+                    
+                    // クリック時に「この地域のオブジェクト」を渡してレベル2を呼ぶ
+                    span.onclick = () => displayRegionDetails(region);
+                    
+                    regCell.appendChild(span);
+                });
+
+                area1.appendChild(table);
+            }
+
+            // レベル2: 地域詳細
+            function displayRegionDetails(region) {
+                const area2 = document.getElementById('level2-area');
+                const area3 = document.getElementById('level3-area');
+                
+                area2.innerHTML = "<h2>地域詳細: " + region.name + "</h2>";
+                area3.innerHTML = ""; // さらに下の階層をクリア
+
+                const table = document.createElement('table');
+
+                // 地域名の行
+                const rowName = table.insertRow();
+                rowName.insertCell().textContent = "地域名";
+                rowName.insertCell().textContent = region.name; // 和訳はあとで実装
+
+                // 従業員の行
+                const rowEmp = table.insertRow();
+                rowEmp.insertCell().textContent = "従業員";
+                const empCell = rowEmp.insertCell();
+
+                // 従業員の配列をループしてリンク風ボタンを作成
+                region.employees.forEach(emp => {
+                    const span = document.createElement('span');
+                    span.textContent = emp.name;
+                    span.className = "clickable-link";
+
+                    // クリック時にこの従業員のオブジェクトを渡してレベル3を呼ぶ
+                    span.onclick = () => displayEmployeeDetails(emp);
+
+                    empCell.appendChild(span);
+                })
+
+                area2.appendChild(table);
+            }
+
+            // レベル3: 従業員詳細
+            function displayEmployeeDetails(emp) {
+                const area3 = document.getElementById('level3-area');
+
+                area3.innerHTML = "<h2>従業員詳細: " + emp.name + "</h2>";
+
+                const table = document.createElement('table');
+
+                // 氏名の行
+                const rowName = table.insertRow();
+                rowName.insertCell().textContent = "氏名";
+                rowName.insertCell().textContent = emp.name;
+
+                // 年齢の行
+                const rowAge = table.insertRow();
+                rowAge.insertCell().textContent = "年齢";
+                rowAge.insertCell().textContent = emp.age + "歳";
+
+                area3.appendChild(table);
+            }
+
+            // function displayTable(fileName) {
+            //     const data = dataStore[fileName];
+            //     const tableBody = document.getElementById('tableBody');
+            //     const headerRow = document.getElementById('headerRow');
+
+            //     tableBody.innerHTML = "";
+            //     headerRow.innerHTML = "";
+
+            //     if (!data || data.length === 0) return;
+
+            //     // 1. ヘッダーを動的に作成（JSONのキーから作成）
+            //     const keys = Object.keys(data[0]);
+            //     keys.forEach(key => {
+            //         const th = document.createElement('th');
+            //         th.textContent = key;
+            //         headerRow.appendChild(th);
+            //     });
+
+            //     // 2. ボディを作成
+            //     data.forEach(item => {
+            //         const row = tableBody.insertRow();
+            //         keys.forEach(key => {
+            //             const cell = row.insertCell();
+            //             cell.textContent = item[key];
+            //         });
+            //     });
+            // }
+
+        </script>
+
+    </body>
 </html>

@@ -1,0 +1,32 @@
+{
+    "name": "Alpha Corp.",
+    "capital_yen": 4000000,
+    "regions": [
+        {
+            "name": "Tokyo",
+            "employees": [
+                {
+                    "name": "Taro",
+                    "age": 20
+                },
+                {
+                    "name": "Hanako",
+                    "age": 25
+                }
+            ]
+        },
+        {
+            "name": "New York",
+            "employees": [
+                {
+                    "name": "Bob",
+                    "age": 35
+                },
+                {
+                    "name": "Emma",
+                    "age": 21
+                }
+            ]
+        }
+    ]
+}
