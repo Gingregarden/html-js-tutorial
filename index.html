@@ -4,6 +4,7 @@
         <meta charset="UTF-8">
         <title>マイGUIアプリ</title>
         <style>
+            /*ハイパーリンク風のボタン*/
             .clickable-link {
                 color: #0066cc;
                 text-decoration: underline;
@@ -13,8 +14,32 @@
             .clickable-link:hover {
                 color: #ff0000;
             }
+
+            /*表*/
             table { margin-top: 10px; border-collapse: collapse; }
             th, td { padding: 8px; border: 1px solid #ccc; }
+
+            /* グラフの外枠 */
+            .chart-container {
+                display: flex;
+                align-items: center;
+                width: 200px; /* グラフの最大幅 */
+                height: 20px;
+                background-color: #f0f0f0; /* 背景（グリッド代わり） */
+                border-radius: 2px;
+            }
+            /* 棒本体 */
+            .bar {
+                height: 100%;
+                background-color: #ff6b6b; /* 画像に近い赤色 */
+                transition: width 0.5s;    /* 伸びるアニメーション（おまけ） */
+            }
+            /* 数値ラベル */
+            .bar-value {
+                margin-left: 8px;
+                font-size: 12px;
+                color: #666;
+            }
         </style>
     </head>
     <body>
@@ -25,7 +50,7 @@
         <div id="fileContent">ここにファイル情報を表示します</div>
 
         <!--ファイル選択ボタン-->
-        <div id="buttonContainer"></div></table>
+        <div id="buttonContainer"></div>
 
         <!--表のひな形-->
         <div id="level1-area"></div>
@@ -134,8 +159,6 @@
                     
                     regCell.appendChild(span);
                 });
-
-                area1.appendChild(table);
             }
 
             // レベル2: 地域詳細
@@ -150,20 +173,21 @@
                 const rowEmp = table.insertRow();
                 rowEmp.insertCell().textContent = "従業員";
                 const empCell = rowEmp.insertCell();
+                const ul = document.createElement('ul');
 
-                // 従業員の配列をループしてリンク風ボタンを作成
+                // 従業員名を箇条書きにする
                 region.employees.forEach(emp => {
+                    const li = document.createElement('li');
                     const span = document.createElement('span');
                     span.textContent = emp.name;
                     span.className = "clickable-link";
+                    span.onclick = () => displayEmployeeDetails(emp)
 
-                    // クリック時にこの従業員のオブジェクトを渡してレベル3を呼ぶ
-                    span.onclick = () => displayEmployeeDetails(emp);
+                    li.appendChild(span);
+                    ul.appendChild(li);
 
-                    empCell.appendChild(span);
+                    empCell.appendChild(ul);
                 })
-
-                area2.appendChild(table);
             }
 
             // レベル3: 従業員詳細
@@ -174,11 +198,36 @@
                 // 氏名の行
                 addInfoRow(table, "氏名", emp.name);
 
-                // 年齢の行
-                addInfoRow(table, "年齢", emp.age + "歳");
+                // グラフの作成
+                const container = document.createElement('div');
+                container.className = 'chart-container';
 
-                area3.appendChild(table);
+                // バーの作成
+                const bar = document.createElement('div');
+                bar.className = 'bar';
+                // 年齢を100点満点に見立てて幅を計算
+                bar.style.width = emp.age + '%';
+
+                // 
+                const valueLabel = document.createElement('span');
+                valueLabel.className = 'bar-value';
+                valueLabel.textContent = emp.age;
+                
+                container.append(bar);
+                container.appendChild(valueLabel);
+
+                // グラフを一行として追加
+                addInfoRow(table, "年齢(グラフ)", container)
+
+                // 画像のように「年度ごとの得点」を一覧で見せたい場合は、display系の関数の中で forEachを使ってこのグラフ行を量産する だけです。
+                // 最大値の計算: グラフの幅を正しく出すために、データの中の最大値（例：1000点）を100%として計算すると、画像のような相対的な長さが再現できます。
+                // 色の使い分け: 棒の色をクラスで変えれば、特定の条件（合格点以上なら青、未満なら赤など）で色分けも可能です。
             }
+
+            // セルに入れるグラフのHTML構造例
+            // <div class="chart-container">
+            //   <div class="bar" style="width: 85%;"></div> <span class="bar-value">850</span>
+            // </div>
 
         </script>
 
