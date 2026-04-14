@@ -65,6 +65,25 @@
                 });
             });
 
+            /**
+             * テーブルに「ラベル：値」の行を追加する
+             * @param {HTMLTableElement} table - 対象のテーブル
+             * @param {string} label - 左側の項目名
+             * @param {string|HTMLElement} value - 右側の値（文字列またはリンク要素）
+             */
+            function addInfoRow(table, label, value) {
+                const row = table.insertRow();
+                row.insertCell().textContent = label;
+                const valueCell = row.insertCell();
+
+                // 値が文字列なら textContent、要素（リンクなど）なら appendChild
+                if (value instanceof HTMLElement) {
+                    valueCell.appendChild(value);
+                } else {
+                    valueCell.textContent = value;
+                }
+}
+
             // レベル1: 会社概要を表示
             function displayCompanyInfo(company) {
                 const area1 = document.getElementById('level1-area');
@@ -79,9 +98,7 @@
                 const table = document.createElement('table');
                 
                 // 資本金の行
-                const rowCap = table.insertRow();
-                rowCap.insertCell().textContent = "資本金";
-                rowCap.insertCell().textContent = company.capital_yen.toLocaleString() + "円";
+                addInfoRow(table, "資本金", company.capital_yen.toLocaleString() + "円");
 
                 // 地域の行
                 const rowReg = table.insertRow();
@@ -114,9 +131,7 @@
                 const table = document.createElement('table');
 
                 // 地域名の行
-                const rowName = table.insertRow();
-                rowName.insertCell().textContent = "地域名";
-                rowName.insertCell().textContent = region.name; // 和訳はあとで実装
+                addInfoRow(table, "地域名", region.name);
 
                 // 従業員の行
                 const rowEmp = table.insertRow();
@@ -147,14 +162,10 @@
                 const table = document.createElement('table');
 
                 // 氏名の行
-                const rowName = table.insertRow();
-                rowName.insertCell().textContent = "氏名";
-                rowName.insertCell().textContent = emp.name;
+                addInfoRow(table, "氏名", emp.name);
 
                 // 年齢の行
-                const rowAge = table.insertRow();
-                rowAge.insertCell().textContent = "年齢";
-                rowAge.insertCell().textContent = emp.age + "歳";
+                addInfoRow(table, "年齢", emp.age + "歳");
 
                 area3.appendChild(table);
             }
